@@ -1,0 +1,1938 @@
+SECOND-PASS ONTOLOGY REVIEW, CLEANUP, AND METADATA ENRICHMENT INSTRUCTIONS
+
+PROJECT PURPOSE
+
+This project is building a unified pathology ontology from multiple pathology sources, including WHO-style classifications, Pathology Outlines/textbook-style organization, organ-specific JSON source files, organ-system YAML files, and external terminology/metadata resources.
+
+The current goal is NOT to rebuild the ontology from scratch.
+
+The working ontology already exists in MergeFinalDraft2. This second pass should:
+1. manually review and improve the existing hierarchy;
+2. resolve obvious within-site duplicates and synonyms;
+3. preserve clinically meaningful distinctions;
+4. attach useful metadata and external terminology mappings;
+5. preserve source provenance;
+6. flag genuinely uncertain decisions rather than forcing them;
+7. iteratively refine the ontology organ system by organ system.
+
+The ontology should become more clinically coherent without losing useful information from the original sources.
+
+================================================================================
+1. FILE / FOLDER ROLES
+================================================================================
+
+Use the project folders as follows.
+
+MergeFinalDraft2/
+- This is the current best merged ontology.
+- Start from this version.
+- Do NOT discard it and independently rebuild the ontology from the YAML or JSON source files.
+- Treat it as the working draft to be reviewed and improved.
+
+Yaml Files/
+- These contain original source hierarchy information organized by organ system.
+- Use them to understand how diagnoses were originally grouped and to compare hierarchy differences when needed.
+- The YAML hierarchy is evidence, not an unquestionable template.
+
+Source JSON folders/
+- JSON files are grouped by organ system.
+- Individual JSON files generally correspond to individual organs/sites.
+- Use these to inspect source diagnoses, labels, links, aliases, and other source-specific metadata.
+
+Metadata/
+- This folder contains the structured external terminology resources used for metadata enrichment.
+- Current expected subfolders are:
+  - ICD-9/
+  - ICD-10/
+  - ICD-11/
+  - ICD-O3.2/
+  - ICD-O4/
+  - NCIt/
+  - SNOMED (currently empty/unavailable)
+- Files may be Excel workbooks, tabular text files, code-description files, annexes, or README/documentation files.
+- Before using an unfamiliar metadata file, inspect its README/documentation, sheet names, columns, code fields, version information, and table purpose.
+- Prefer these structured local resources over free-form web searching.
+- Do not invent metadata that is not supported by a reliable source.
+- If multiple terminology versions are present, preserve the terminology system and version in the mapping.
+- Do not treat absence of a mapping in one code system as an ontology error. Not every pathology diagnosis will map cleanly or uniquely to every external terminology.
+
+Site Review Instructions/
+- Each organ system may have a separate reviewer-feedback file.
+- Read the relevant site-specific feedback file before beginning that organ system.
+- These reviewer notes identify known problem areas but are NOT exhaustive.
+- They do not replace the requirement to inspect every diagnosis and hierarchy manually.
+
+Results/
+- Save all modified ontology files, review outputs, and change logs here.
+- Never overwrite MergeFinalDraft2 or the original source files.
+
+================================================================================
+2. CORE REVIEW PHILOSOPHY
+================================================================================
+
+This is a MANUAL REASONING task, not a string-matching cleanup task.
+
+For every diagnosis or assignable entity:
+- inspect the diagnosis name;
+- inspect the full parent chain;
+- determine what the entity actually represents;
+- compare it to neighboring diagnoses;
+- check whether its current classification makes clinical sense;
+- inspect relevant YAML/JSON source entries when needed;
+- inspect external metadata resources when needed;
+- decide whether its current placement is defensible.
+
+Do not simply preserve hierarchy because it came from a source.
+
+Do not make decisions solely from:
+- exact string matching;
+- shared keywords;
+- prefixes/suffixes;
+- embedding similarity;
+- fuzzy-match scores;
+- automated text similarity;
+- the fact that two concepts appear near each other in a source.
+
+Automated searching may be used to FIND possible duplicates, synonyms, source matches, or related records.
+
+The final decision must be based on the concepts' meanings.
+
+The ontology should be reviewed concept-by-concept and branch-by-branch.
+
+================================================================================
+3. DECISION PRIORITY
+================================================================================
+
+When classification choices conflict, use this priority:
+
+1. Diagnostic correctness
+2. Clinically meaningful organization
+3. Correct concept identity and synonym handling
+4. Preservation of source metadata and provenance
+5. Internal consistency of hierarchy
+6. Avoidance of redundant nodes
+7. Faithfulness to source hierarchy
+
+The original source hierarchy is evidence, not authority.
+
+================================================================================
+4. MANUALLY REVIEW EVERY DIAGNOSIS AND ITS PLACEMENT
+================================================================================
+
+For every diagnosis/leaf, inspect the complete parent chain and ask:
+
+- Is this diagnosis actually a member of this organ/site?
+- Is it neoplastic, non-neoplastic, precursor, tumor-like, benign, borderline, uncertain behavior, in situ, malignant, etc., as claimed by its parent?
+- Does it belong to the stated histologic family?
+- Is it epithelial, mesenchymal, neuroendocrine, hematolymphoid, germ cell, melanocytic, trophoblastic, etc.?
+- Is the parent category clinically meaningful or just inherited from textbook/source formatting?
+- Does the diagnosis belong more naturally somewhere else?
+- Is the diagnosis being forced into a category simply because one source grouped it that way?
+- Is this node actually a diagnosis, or only a grouping/category heading?
+- Is the same diagnosis duplicated elsewhere within the same individual organ/site?
+
+If a diagnosis is clearly misplaced, move it to the most defensible location.
+
+If classification is genuinely ambiguous, preserve the diagnosis and FLAG FOR REVIEW rather than making a destructive or speculative change.
+
+================================================================================
+5. ORGANIZATION: NEOPLASTIC VS NON-NEOPLASTIC, HISTOGENESIS, BEHAVIOR
+================================================================================
+
+The merged ontology sometimes combines different classification strategies because WHO and Pathology Outlines may organize the same site differently.
+
+One source may organize primarily by histogenesis/lineage:
+- epithelial
+- glandular
+- squamous
+- mesenchymal
+- neuroendocrine
+- hematolymphoid
+- germ cell
+- melanocytic
+- trophoblastic
+
+Another may organize primarily by behavior or conceptual status:
+- benign
+- borderline/intermediate
+- uncertain behavior
+- in situ
+- malignant
+- precursor
+- tumor-like
+- non-neoplastic
+
+These axes overlap. A diagnosis can be both epithelial AND malignant, for example.
+
+Do NOT mechanically preserve both source hierarchies if doing so creates duplicate or overlapping branches.
+
+For every organ/site, manually decide which organizational axis is most informative for each local branch. There is no universal rule that histogenesis must always come first or that benign/malignant must always come first.
+
+Ask:
+- Which axis provides the clearest clinically meaningful grouping for this site?
+- Are benign and malignant diagnoses being separated in a useful way, or are they needlessly splitting the same histologic family across parallel branches?
+- Would epithelial/mesenchymal/etc. be a better primary branch, with behavior beneath it or represented as metadata?
+- Conversely, is behavior the clinically established organizing principle for this particular site?
+- Are some categories duplicated because WHO and Pathology Outlines used different philosophies?
+- Does moving a diagnosis into another existing category make every parent label more semantically accurate?
+- Is a category technically true but still unhelpful or redundant?
+
+Treat every parent-child edge as the statement:
+
+    "Child is a type/member of Parent."
+
+That statement must be true AND useful.
+
+If a parent says Malignant tumors, every child under it must be malignant.
+If a parent says Epithelial tumors, every child under it must be epithelial.
+If a parent says Precursor lesions, every child under it must truly be a precursor.
+If a parent says Non-neoplastic lesions, every child under it must actually be non-neoplastic.
+
+Do not keep a diagnosis under a semantically false parent merely because one source placed it there.
+
+Example of a structure that should trigger review:
+
+    Tumors -> Benign tumors -> Epithelial tumors -> Diagnosis A
+    Tumors -> Epithelial tumors -> Malignant tumors -> Diagnosis B
+
+This might be defensible, but it might also be two source hierarchies pasted together. Inspect the diagnoses and decide which classification axis is more coherent for that site/branch.
+
+Do not flatten clinically meaningful distinctions merely to make every organ look symmetrical. Clinical meaning is more important than cosmetic consistency.
+
+================================================================================
+6. REMOVE SOURCE / TEXTBOOK / NAVIGATION ARTIFACTS
+================================================================================
+
+The original source material may contain textbook, chapter, webpage, or navigation language such as:
+- Introduction
+- Overview
+- General
+- General information
+- Classification
+- Terminology
+- similar non-diagnostic section labels
+
+These are not automatically ontology concepts.
+
+A. STANDALONE SOURCE HEADING
+If a node exists only because it was a textbook/webpage heading and is not a diagnosis or meaningful diagnostic category, remove it or flatten through it.
+
+B. ARTIFACT ATTACHED TO A REAL DIAGNOSIS
+If a source title is something like:
+- "Endometrial carcinoma - general"
+- "X tumor: overview"
+and the source page actually represents diagnosis X, keep the diagnosis but clean the concept name to the actual diagnosis. Preserve the original source title in provenance if useful.
+
+C. CLEANING REVEALS A DUPLICATE
+If removing General/Overview/etc. reveals that the source entry is simply another instance of a diagnosis already represented within the same site, do NOT create or retain a second leaf. Confirm concept identity and merge its provenance/metadata into the existing diagnosis.
+
+D. DO NOT DELETE THE DIAGNOSIS WITH THE ARTIFACT
+A legitimate diagnosis should not be removed merely because its source title contained source-navigation language. Normalize the concept name instead.
+
+Also remove other obviously non-diagnostic navigation/header nodes when discovered.
+
+Concept names should be clean, diagnostic, and free of source-interface wording.
+
+================================================================================
+7. DISTINGUISH DIAGNOSIS FROM CATEGORY
+================================================================================
+
+Every node should intentionally function as one of:
+- a diagnostic entity;
+- a meaningful diagnostic grouping/category;
+- a cross-reference, if cross-references are used;
+- a reserved/placeholder category only when there is an explicit reason.
+
+Do not allow source formatting to turn a diagnosis into a category or a category into a diagnosis.
+
+Avoid structures where an identical diagnosis is unnecessarily repeated beneath a same-named category.
+
+================================================================================
+8. WITHIN-SITE DUPLICATE / SYNONYM SCOPE
+================================================================================
+
+IMPORTANT: At this stage, ONLY deduplicate within the SAME INDIVIDUAL ORGAN OR SITE.
+
+Examples of individual sites include:
+- cervix
+- uterine corpus
+- ovary
+- fallopian tube
+- vagina
+- vulva
+- placenta
+- peritoneum
+- broad ligament / other uterine ligaments
+- other specific organs represented as separate site files
+
+Do NOT currently canonicalize diagnoses across different organs.
+
+Do NOT merge, deduplicate, or cross-link diagnoses merely because the same or similar entity appears in:
+- cervix and uterine corpus;
+- ovary and fallopian tube;
+- different organs within the same organ system;
+- different organ systems.
+
+A diagnosis that appears in multiple organs may legitimately remain separately represented for now.
+
+Cross-organ identity reconciliation will be handled later.
+
+This is especially important for:
+- neuroendocrine tumors;
+- mesenchymal / soft-tissue tumors;
+- hematolymphoid lesions;
+- metastatic disease;
+- melanocytic lesions;
+- entities with site-specific criteria or behavior.
+
+Within ONE individual site, however, obvious duplicate leaves, duplicate source-derived copies, alternate spellings, and true synonyms should be reviewed and merged when they genuinely represent the same diagnosis.
+
+================================================================================
+9. SYNONYM / DUPLICATE DECISION RULES
+================================================================================
+
+Two entries may be merged within an organ/site only when they truly refer to the SAME pathological entity.
+
+Common situations that may represent the same diagnosis include:
+
+A. American vs British spelling
+Examples:
+- tumor / tumour
+- estrogen / oestrogen
+
+B. Punctuation or formatting differences
+Examples:
+- hyphenation
+- capitalization
+- minor spacing
+- harmless singular/plural formatting where meaning is unchanged
+
+C. Abbreviation vs full name
+Only when the abbreviation clearly refers to that exact diagnosis.
+
+D. Explicit synonyms in source material
+
+E. Historical vs current terminology
+Only when they genuinely refer to the same entity.
+Keep the old/alternate term as an alias.
+
+F. Minor wording differences that do not alter diagnostic meaning
+Examples:
+- reordered wording;
+- implied site term omitted because the site is already established;
+- trivial source-specific phrasing differences.
+
+G. WHO vs Pathology Outlines names for the same accepted diagnosis
+
+When merging true synonyms:
+1. choose one preferred/canonical display name;
+2. retain alternate names as aliases/synonyms;
+3. merge all non-conflicting metadata;
+4. preserve provenance from all source entries;
+5. retain source-original names;
+6. retain non-conflicting IDs, links, annotations, and mappings;
+7. record conflicts rather than silently discarding them.
+
+DO NOT merge solely because names share important keywords.
+
+Keywords such as:
+- carcinoma
+- adenocarcinoma
+- stromal
+- endometrioid
+- serous
+- clear cell
+- squamous
+- neuroendocrine
+- mesenchymal
+- sarcoma
+- smooth muscle
+- trophoblastic
+- germ cell
+may occur in many genuinely distinct diagnoses.
+
+DO NOT merge:
+- a broad diagnosis with one of its subtypes;
+- a tumor family with a specific tumor;
+- a precursor lesion with invasive disease;
+- benign, borderline, uncertain-behavior, in situ, and malignant forms;
+- primary disease with metastatic disease;
+- two similarly named site-specific entities when site changes the diagnosis;
+- concepts that differ by molecular definition;
+- concepts that differ meaningfully in expected behavior or classification criteria.
+
+If names appear synonymous but equivalence is not clear, inspect the source hierarchy, source metadata, and reliable local metadata resources before deciding.
+
+================================================================================
+10. SPELLING AND DISPLAY NORMALIZATION
+================================================================================
+
+Trivial spelling variants should not create duplicate entities.
+
+Use one consistent preferred display convention in the final ontology.
+
+Preserve source-original wording in provenance and/or aliases where useful.
+
+Do not interpret trivial spelling normalization as evidence that two otherwise different diagnoses are synonymous.
+
+================================================================================
+11. PARENT / CHILD RELATIONSHIPS
+================================================================================
+
+Do not collapse a broad diagnostic class into one of its subtypes.
+
+If one concept is genuinely broader than another, preserve the parent-child relationship.
+
+Examples of the general pattern:
+- broad carcinoma category
+  - specific subtype
+- broad sarcoma category
+  - specific sarcoma type
+
+Do not mark parent and child as synonyms merely because their wording overlaps.
+
+================================================================================
+12. REDUNDANT HIERARCHY LEVELS
+================================================================================
+
+Look for branches that add no meaningful information.
+
+Examples:
+- Borderline Brenner tumor -> Borderline Brenner tumor
+- Endometriosis and related conditions -> Endometriosis
+  when there are no actual related conditions
+- Metastases -> Metastases to ovary
+  inside an ovarian ontology
+
+Inspect all single-child categories.
+
+A one-child category is not automatically wrong.
+
+Keep it if it carries real classification meaning.
+
+Flatten it if it is only:
+- repeated wording;
+- duplicated site wording;
+- source-document formatting;
+- an empty intermediate heading;
+- a meaningless drill-down.
+
+Especially inspect:
+- parent and child with effectively identical names;
+- empty categories;
+- placeholder categories;
+- repeated source-derived headings;
+- site wording already implied by the organ context.
+
+================================================================================
+13. EMPTY AND INCOMPLETE CATEGORIES
+================================================================================
+
+Find all non-leaf nodes with:
+- zero children;
+- only placeholder content;
+- a heading implying several diagnoses but only one unexplained child.
+
+Determine whether the category should:
+- receive diagnoses currently misplaced elsewhere;
+- be intentionally retained;
+- be renamed;
+- be flattened;
+- be removed.
+
+Do not leave misleading empty headings such as Precursor lesions without a concrete reason.
+
+================================================================================
+14. METASTASIS BRANCHES
+================================================================================
+
+Review metastasis branches carefully.
+
+Do not enumerate every theoretically possible primary cancer that could metastasize to an organ.
+
+Determine whether the ontology intends to represent:
+- common metastatic primaries;
+- diagnostically characteristic metastatic primaries;
+- a limited clinically useful set;
+- or a more comprehensive structure.
+
+Use one coherent policy within a site.
+
+Avoid redundant site wording when the organ context already makes it obvious.
+
+Do not create unnecessary deep source-derived hierarchies simply because the original source listed many possibilities.
+
+================================================================================
+15. SITE-SPECIFIC DIAGNOSES
+================================================================================
+
+Be conservative with site-specific pathology.
+
+Do not over-normalize.
+
+If two entities differ because of:
+- organ-specific diagnostic criteria;
+- accepted site-specific terminology;
+- molecular definition;
+- expected behavior;
+- classification rules;
+- different precursor relationships;
+- different site-specific clinical meaning;
+
+keep them separate.
+
+Clinical meaning takes priority over structural neatness.
+
+================================================================================
+16. METADATA ATTACHMENT
+================================================================================
+
+Metadata enrichment happens only AFTER concept identity has been understood.
+
+Do not attach a code merely because its label looks similar to the ontology diagnosis.
+
+For each diagnosis:
+1. resolve the diagnosis identity and preferred name;
+2. identify confirmed synonyms/aliases;
+3. search structured local metadata resources for candidate mappings;
+4. inspect candidate meaning and granularity;
+5. decide whether the mapping is exact, broader, narrower, approximate, ambiguous, or absent;
+6. attach only mappings that have been semantically verified.
+
+Not every diagnosis should have a mapping in every terminology system.
+
+Missing metadata is preferable to false metadata.
+
+For each diagnosis, attempt to attach where supported:
+
+A. Preferred/default name
+
+B. Synonyms / alternate names
+
+C. Acronyms / abbreviations
+
+D. Source provenance
+Preserve:
+- source name;
+- original source diagnosis/page name;
+- original organ/site;
+- original hierarchy/path;
+- source URL, if available;
+- source-specific ID, if available;
+- source file name.
+
+E. WHO mapping
+Where available:
+- WHO preferred/entity name;
+- WHO identifier/code;
+- WHO source/version;
+- WHO link/reference.
+
+F. Pathology Outlines mapping
+Where available:
+- Pathology Outlines title;
+- page/link;
+- source path;
+- source identifier if present.
+
+G. ICD-9 mapping, when supported
+
+H. ICD-10 mapping, when supported
+
+I. ICD-11 mapping, when supported
+
+J. ICD-O 3.2 mapping, when supported
+
+K. ICD-O 4 mapping, when supported
+
+L. NCIt mapping, when supported
+
+M. SNOMED CT
+- CURRENTLY DO NOT POPULATE unless authorized structured SNOMED data is later added to Metadata/.
+- The current SNOMED folder is empty/unavailable.
+- Do not invent SCTIDs and do not substitute random web results for an authorized terminology source.
+
+N. Other structured metadata resources placed in Metadata/
+Include only when they clearly map to the same concept and add useful information.
+
+O. Related terms
+Use VERY conservatively. Do not use related_terms as a dumping ground for vaguely associated concepts. Prefer synonym, acronym, parent/child relationship, provenance, or formal external mapping whenever possible.
+
+If no reliable mapping exists, leave the field empty or FLAG FOR REVIEW.
+
+Never invent IDs, codes, synonyms, or links.
+
+================================================================================
+17. METADATA TABLE REVIEW AND ITERATIVE MAPPING
+================================================================================
+
+Metadata/ currently contains multiple coding systems and file formats.
+
+Before assigning anything from a metadata resource:
+1. inspect README/documentation if present;
+2. inspect workbook sheet names if Excel;
+3. inspect column names;
+4. identify the actual code field;
+5. identify the preferred label/description field;
+6. identify terminology version;
+7. determine whether the table is a direct code table, index, annex, order file, morphology table, topography table, or another auxiliary file;
+8. identify behavior/topography/morphology fields where applicable.
+
+Do not assume every TXT/XLSX file is a direct diagnosis-to-code lookup.
+
+Use an iterative mapping process:
+
+STEP 1 — GENERATE CANDIDATES
+Search using:
+- preferred diagnosis name;
+- confirmed synonyms;
+- acronyms when unambiguous;
+- normalized tumor/tumour spelling;
+- source-original names.
+
+STEP 2 — VERIFY SEMANTICS
+For each candidate ask:
+- Is this actually the same disease/entity?
+- Is the external concept broader than the ontology diagnosis?
+- Is it narrower?
+- Is it site-only rather than histology-specific?
+- Is it morphology-only?
+- Is it a legacy category?
+- Does behavior match?
+- Does topography match when relevant?
+
+STEP 3 — ASSIGN RELATION
+Use:
+- EXACT: same diagnosis/entity
+- SYNONYM: accepted alternate label for same entity
+- BROADER: external code/category is broader than ontology diagnosis
+- NARROWER: external concept is more specific
+- APPROXIMATE: useful related mapping but not identity
+- AMBIGUOUS: multiple plausible mappings / insufficient certainty
+- NO_MATCH: no defensible mapping found
+
+Do not call a broad ICD category EXACT merely because it contains the diagnosis.
+
+STEP 4 — ATTACH PROVENANCE
+Preserve where possible:
+- terminology system;
+- version;
+- code;
+- external preferred label;
+- source file;
+- source workbook sheet/table;
+- mapping relation;
+- confidence;
+- notes for non-exact mappings.
+
+STEP 5 — RECHECK AFTER ALIASES MERGE
+If several internal aliases collapse into one diagnosis, consolidate their external mappings at the canonical diagnosis level. Do not create duplicate mapping records simply because several aliases matched the same external code.
+
+STEP 6 — ITERATE
+After the first metadata pass, review ambiguous/no-match diagnoses separately. Use additional synonyms/source names where justified, but do not loosen semantic standards merely to increase coverage.
+
+================================================================================
+17A. ICD-O 3.2 / ICD-O 4 RULES
+================================================================================
+
+For neoplasms, preserve ICD-O components separately when available:
+- ICD-O version;
+- morphology code;
+- morphology label;
+- behavior component/classification;
+- topography code;
+- topography label;
+- mapping relation;
+- source file/table.
+
+Do not collapse morphology and topography into one uninterpretable value.
+
+The same morphology code may legitimately occur in multiple organs.
+The same external code may legitimately map to multiple ontology diagnoses.
+That is not automatically a duplicate or error.
+
+Do not merge ontology diagnoses merely because they share an ICD-O code.
+
+Where both ICD-O 3.2 and ICD-O 4 are available:
+- preserve the version explicitly;
+- prefer the newer ICD-O4 mapping when applicable for current metadata;
+- retain ICD-O3.2 where useful for legacy/version comparison;
+- do not silently treat codes from different versions as interchangeable.
+
+================================================================================
+17B. ICD-9 / ICD-10 / ICD-11 RULES
+================================================================================
+
+General ICD systems may be broader than the pathology ontology and may emphasize site, behavior, or clinical coding rather than detailed histology.
+
+Therefore:
+- do not force every pathology diagnosis to have an ICD mapping;
+- do not treat a broad site/behavior code as exact histologic identity;
+- use BROADER or APPROXIMATE when appropriate;
+- preserve terminology version and source file;
+- permit multiple diagnoses to share the same ICD code;
+- permit one diagnosis to have more than one justified context/version mapping;
+- do not merge ontology diagnoses merely because they share an ICD code.
+
+ICD-9 should generally be treated as legacy metadata rather than as a driver of concept identity or hierarchy.
+
+ICD-10 and ICD-11 should supplement the ontology, not determine its structure.
+
+================================================================================
+17C. NCIt RULES
+================================================================================
+
+Use the structured NCIt files in Metadata/ as the preferred source.
+
+For a verified NCIt mapping preserve:
+- NCIt code;
+- preferred term;
+- useful accepted synonym when relevant;
+- mapping relation;
+- source/version when available;
+- source file/table.
+
+If NCIt contains both a broad family concept and a specific diagnosis, map to the most appropriate level and label the semantic relation correctly.
+
+Do not assign an NCIt code solely because one keyword matches.
+
+================================================================================
+17D. SNOMED RULES
+================================================================================
+
+SNOMED is not part of the current enrichment pass because the project does not currently have the required structured/authorized SNOMED data.
+
+Leave SNOMED fields empty/unmapped for now.
+
+Do not:
+- invent SCTIDs;
+- scrape random web pages for SCTIDs;
+- treat missing SNOMED data as a quality failure.
+
+If an authorized structured SNOMED dataset is later added to Metadata/, perform a separate SNOMED enrichment pass.
+
+================================================================================
+17E. SHARED CODES AND MULTIPLE CODES
+================================================================================
+
+It is completely acceptable for multiple diagnoses to share the same external code.
+
+External coding systems may be less granular than this ontology.
+
+Likewise, one diagnosis may legitimately have multiple mappings because of:
+- terminology version;
+- morphology plus topography;
+- behavior;
+- legacy coding;
+- context-dependent granularity.
+
+Never infer concept identity from code equality alone.
+
+Never merge diagnoses merely because they share a code.
+
+Never create artificial duplicate external mappings because several aliases resolve to the same code.
+
+================================================================================
+18. WHO / NEW CLASSIFICATION MATERIAL
+================================================================================
+
+A newer WHO-related source or classification material may be added to the project.
+
+For the current pass:
+- do NOT automatically rebuild the ontology around newly introduced WHO diagnoses;
+- do NOT let a new WHO source destabilize an otherwise coherent second-pass cleanup.
+
+However:
+- inspect the new WHO material when relevant to terminology or classification questions;
+- note any genuinely new diagnoses not represented in MergeFinalDraft2;
+- record them as possible additions for a later dedicated incorporation pass;
+- preserve enough information to revisit them later.
+
+New WHO diagnoses should generally be embedded into the ontology in a later deliberate pass after the current cleanup is stable, unless there is a compelling reason to add one immediately.
+
+Maintain a NEW WHO CANDIDATES list containing, where available:
+- proposed diagnosis name;
+- organ/site;
+- source/version;
+- source path;
+- whether it appears genuinely new versus a rename/synonym;
+- possible parent location;
+- notes requiring review.
+
+During the later dedicated WHO incorporation pass, compare each candidate against the cleaned ontology before adding it. New source terminology may represent a genuinely new diagnosis, a renamed diagnosis, a reclassified diagnosis, or a synonym. Do not create duplicates merely because a new WHO edition uses a new name.
+
+If a new WHO source clarifies that an existing diagnosis is misnamed, obsolete, or clearly misclassified, record the issue and flag it for review rather than silently restructuring large branches.
+
+================================================================================
+19. RELATIONSHIP / DECISION LABELS
+================================================================================
+
+When comparing concepts, use the following relationship labels when useful:
+
+SAME_CONCEPT
+- genuinely the same pathological entity
+
+SYNONYM
+- alternate name for the same entity
+
+PARENT_CHILD
+- one concept is genuinely broader/narrower
+
+KEEP_SEPARATE
+- related or similar but diagnostically distinct
+
+GROUPING_ONLY
+- meaningful organizational category, not itself a diagnosis
+
+NEEDS_REVIEW
+- insufficient certainty to decide safely
+
+================================================================================
+20. HIERARCHY ACTION LABELS
+================================================================================
+
+Use these actions in the change log:
+
+KEEP
+MOVE
+RENAME
+MERGE
+FLATTEN
+REMOVE
+FLAG FOR REVIEW
+
+At this stage, do not perform cross-organ canonicalization or cross-organ deduplication.
+
+If a future cross-organ linkage seems potentially useful, note it for later rather than implementing it now.
+
+================================================================================
+21. PROVENANCE PRESERVATION
+================================================================================
+
+Structural cleanup must NOT destroy source provenance.
+
+Whenever an entity is:
+- merged;
+- renamed;
+- moved;
+- deduplicated;
+- flattened;
+- remapped;
+
+retain enough information to reconstruct:
+- which source(s) contained the entity;
+- the original source name;
+- original hierarchy/path if useful;
+- source-specific IDs/mappings;
+- aliases;
+- source URL(s);
+- source file(s);
+- other useful source metadata.
+
+Where an entity appears in multiple sources, combine provenance rather than choosing one source and deleting the other.
+
+================================================================================
+22. METADATA CONFLICTS
+================================================================================
+
+If two sources disagree:
+- do not silently choose one value;
+- preserve both source-specific values when useful;
+- record the conflict;
+- flag the concept if the disagreement affects identity or classification.
+
+If one source is clearly using older terminology for the same established entity, the modern term may be used as preferred name while retaining the older term as an alias.
+
+If disagreement may indicate two genuinely different diagnoses, do NOT merge.
+
+================================================================================
+23. MISSING SOURCE CONCEPTS
+================================================================================
+
+While reviewing source files, you may encounter concepts not present in MergeFinalDraft2.
+
+Do not automatically insert every missing heading or term.
+
+First determine whether the missing item is:
+- a true diagnosis;
+- a synonym of an existing diagnosis;
+- a parent/grouping category;
+- an organizational artifact;
+- intentionally represented elsewhere within the same site;
+- a genuinely missing diagnosis;
+- a new WHO diagnosis better handled in a later incorporation pass.
+
+If genuinely missing and clearly justified, record it as a proposed addition or flagged issue.
+
+Do not quietly insert uncertain entities.
+
+================================================================================
+24. ORGAN-LEVEL CONSISTENCY PASS
+================================================================================
+
+After manually reviewing individual diagnoses within an organ/site, perform a full organ-level consistency pass.
+
+Check for:
+- duplicate canonical entities within the same site;
+- synonymous entities not merged;
+- contradictory classifications;
+- inconsistent benign/borderline/malignant organization;
+- inconsistent epithelial/mesenchymal/etc. organization;
+- empty branches;
+- redundant single-child chains;
+- Introduction/Overview/source artifacts;
+- repeated categories inherited from multiple sources;
+- diagnoses under incompatible parents;
+- aliases accidentally represented as separate diagnoses;
+- metadata lost during merges;
+- duplicate external mappings;
+- suspicious naming inconsistencies;
+- unsupported metadata mappings.
+
+Do not stop after fixing only the initially obvious examples.
+
+Apply the same reasoning systematically across the full site.
+
+================================================================================
+25. DIAGNOSIS COUNTING
+================================================================================
+
+When counting diagnoses:
+
+Count:
+- distinct diagnosis leaves;
+- non-leaf nodes that are themselves valid assignable diagnoses even if more specific children exist beneath them.
+
+Do NOT count:
+- pure organizational headings;
+- empty grouping nodes;
+- source-navigation artifacts;
+- aliases/synonyms as separate diagnoses.
+
+================================================================================
+26. REQUIRED CHANGE LOG
+================================================================================
+
+For each meaningful change, record:
+
+- organ system;
+- organ/site;
+- entity or branch affected;
+- original path/name;
+- new path/name;
+- action taken:
+  - KEEP
+  - MOVE
+  - RENAME
+  - MERGE
+  - FLATTEN
+  - REMOVE
+  - FLAG FOR REVIEW
+- reason;
+- source(s) involved;
+- aliases merged, if any;
+- metadata/provenance retained;
+- confidence level;
+- unresolved question, if any.
+
+For uncertain classifications, FLAG FOR REVIEW rather than making an unsupported destructive change.
+
+================================================================================
+27. REQUIRED SUMMARY AFTER EACH ORGAN / ORGAN SYSTEM
+================================================================================
+
+At the end of each organ/site review, summarize:
+- major structural problems found;
+- duplicate/synonymous diagnoses merged;
+- hierarchy inconsistencies corrected;
+- redundant nodes flattened or removed;
+- metadata attached;
+- external mappings added;
+- unresolved classification questions;
+- diagnoses/categories requiring expert review;
+- possible new diagnoses identified for a later WHO incorporation pass.
+
+At the end of the whole organ system, provide a brief higher-level summary of recurring issues across its sites.
+
+================================================================================
+28. ITERATIVE REVIEW / REFINEMENT
+================================================================================
+
+This project is explicitly iterative.
+
+Do not assume one pass permanently resolves a site.
+
+Work one organ/site at a time using the following loop.
+
+PASS A — ORIENT
+1. Load the current site from MergeFinalDraft2 or the newest approved draft.
+2. Load the corresponding WHO YAML.
+3. Load the corresponding Pathology Outlines YAML.
+4. Load relevant organ JSON source files.
+5. Read site-specific expert feedback.
+6. Identify relevant Metadata/ resources.
+
+PASS B — HIERARCHY REVIEW
+7. Walk every diagnosis and full parent chain.
+8. Check whether each parent label is semantically true and useful.
+9. Identify source artifacts, empty categories, redundant levels, and obviously misplaced diagnoses.
+10. Compare WHO vs Pathology Outlines organization when the merged structure is unclear.
+
+PASS C — IDENTITY REVIEW
+11. Search within the SAME SITE for duplicate leaves, aliases, alternate spellings, and repeated source-derived diagnoses.
+12. Manually verify each suspected synonym/duplicate.
+13. Merge only true same-concept duplicates.
+14. Preserve aliases and provenance.
+
+PASS D — CONCEPT NAME CLEANUP
+15. Remove Introduction/Overview/General and similar source artifacts from concept names when they are not part of the diagnosis.
+16. Normalize trivial spelling/formatting.
+17. If cleanup reveals an already-existing diagnosis in the same site, merge provenance rather than preserving duplicate leaves.
+
+PASS E — METADATA ENRICHMENT
+18. Use local structured metadata tables to generate candidate mappings.
+19. Manually verify candidate semantics.
+20. Attach mapping relation, terminology version, source file/table, and confidence.
+21. Do not force absent/ambiguous mappings.
+
+PASS F — SECOND CONSISTENCY LOOP
+22. Re-read the cleaned site from the top.
+23. Re-check every changed branch.
+24. Ask whether a move created a new semantic problem.
+25. Ask whether a merge erased a meaningful distinction.
+26. Check whether overlapping classification axes remain.
+27. Check whether source artifacts became visible only after flattening.
+28. Re-check every external mapping marked EXACT.
+
+PASS G — SAVE A NEW DRAFT
+29. Save to Results/ as a NEW version.
+30. Never overwrite MergeFinalDraft2 or the immediately preceding draft.
+31. Update the change log.
+32. Update unresolved-review notes.
+33. Update metadata mapping summary.
+34. Update the New WHO Candidates list if applicable.
+
+PASS H — REOPEN AND VERIFY
+35. Re-open/re-read the newly generated draft rather than assuming the write was correct.
+36. Inspect every changed branch again.
+37. Compare diagnosis counts before/after.
+38. Confirm metadata/provenance survived merges and moves.
+39. If further high-confidence corrections are found, create another version and repeat.
+
+Suggested versioning:
+- FemaleGenital_pass2_v01
+- FemaleGenital_pass2_v02
+- FemaleGenital_pass2_v03
+
+Exact names can differ, but prior iterations must remain recoverable.
+
+After all sites in an organ system have been individually reviewed:
+40. perform an organ-system consistency pass;
+41. check terminology/granularity across sites without merging them;
+42. preserve justified site-specific differences;
+43. flag issues that belong to a future cross-organ harmonization phase.
+
+Later phases may include:
+- dedicated incorporation of newly released WHO diagnoses;
+- cross-organ identity/canonicalization review;
+- SNOMED enrichment if authorized data becomes available.
+
+Do not prematurely perform later-phase work during the current site-level cleanup.
+
+================================================================================
+29. VALIDATION BEFORE SAVING
+================================================================================
+
+Before considering an organ/site complete, check for:
+- duplicate IDs;
+- duplicated canonical diagnoses within the same site;
+- obvious synonym duplicates still represented independently;
+- concepts accidentally deleted;
+- empty nodes;
+- source/navigation artifacts;
+- broken parent-child references;
+- self-parent relationships;
+- circular hierarchy;
+- source records mapped to unrelated concepts;
+- missing provenance;
+- duplicate external mappings;
+- synonyms incorrectly used for subtypes;
+- unsupported coding mappings;
+- large unexplained changes in concept count.
+
+Large or surprising structural changes should trigger review.
+
+================================================================================
+30. FEMALE GENITAL TRACT: SPECIFIC CONCERNS FROM EXPERT REVIEW
+================================================================================
+
+During the female genital tract second pass, give particular attention to the following reviewer-identified areas.
+
+These are starting points for manual review, not an exhaustive list, and should not override the broader requirement to inspect every diagnosis and hierarchy.
+
+For every issue below:
+1. inspect the current MergeFinalDraft2 structure;
+2. inspect the original YAML/source structures;
+3. manually determine what the diagnoses actually represent;
+4. preserve the current structure when it is medically defensible;
+5. modify it only when there is a clear reason;
+6. flag genuinely uncertain decisions rather than forcing a change.
+
+The expert review was broadly positive about the individual diagnostic content of much of the female genital tract tree. Therefore, prioritize correcting specific classification and hierarchy problems that can be justified rather than reorganizing already-sound sections merely to make every anatomic site structurally identical.
+
+UTERINE CORPUS: NEOPLASTIC VS NON-NEOPLASTIC ORGANIZATION
+Reassess the top-level structure around:
+- Non-neoplastic lesions
+- Tumor-like lesions
+- Tumors of the uterine corpus
+
+The reviewer specifically questioned the placement/classification of endometrial polyp and endometriosis/endometriosis-related conditions and felt the current distinction between tumor, tumor-like, neoplastic, and non-neoplastic was conceptually unclear.
+
+Decide on a medically defensible structure rather than automatically preserving source hierarchy.
+
+UTERINE CORPUS PRECURSOR STRUCTURE
+Review the Precursor lesions branch under endometrial epithelial tumors/precursors.
+
+It appeared empty in the reviewed version.
+
+Determine whether:
+- existing diagnoses belong there;
+- diagnoses are currently misplaced elsewhere;
+- or the branch itself is unnecessary.
+
+Do not leave a misleading empty precursor category.
+
+ENDOMETRIOSIS HIERARCHY
+Review repeated structures such as:
+Endometriosis and related conditions -> Endometriosis
+
+This is particularly relevant in uterine corpus and ovary.
+
+If there are no actual related conditions, correct the category wording or flatten the redundant hierarchy rather than implying additional content.
+
+CORPUS VERSUS CERVIX ORGANIZATION
+Review repeated uterine/cervical mesenchymal tumor groupings.
+
+The reviewer felt epithelial classifications were more clearly site-specific, whereas portions of the mesenchymal classification appeared repetitive across corpus and cervix.
+
+IMPORTANT:
+- do NOT merge corpus and cervix entities across sites during this pass;
+- instead evaluate whether each site's internal organization makes sense;
+- preserve site distinctions where pathology genuinely differs;
+- do not let source formatting create unnecessary internal duplication within a site.
+
+HEMATOLYMPHOID COVERAGE BY SITE
+Check whether the presence of a hematolymphoid proliferation/neoplasia section in cervix but not apparently in uterine corpus reflects:
+- a deliberate classification decision;
+- site-specific relevance;
+- or inconsistent source coverage.
+
+Do not force symmetry if the asymmetry is clinically justified.
+
+BREAST NEUROENDOCRINE COMPARISON RELEVANT TO CONSISTENCY
+The reviewer noted during cervical review that neuroendocrine carcinoma was subdivided into large-cell and small-cell forms there, whereas the breast hierarchy had not made the same distinction.
+
+Do NOT automatically add those subdivisions elsewhere.
+
+Use this only as a reminder to check whether differing granularity across sites is:
+- clinically intentional;
+- source-driven;
+- or inconsistent.
+
+OVARY: BRENNER TUMOR HIERARCHY
+Inspect benign, borderline, and malignant Brenner tumor branches for:
+- repeated labels;
+- unnecessary drill-downs;
+- parent-child pairs that do not add classification meaning.
+
+Flatten redundant repeated hierarchy where appropriate.
+
+OVARY: OVERALL TUMOR ORGANIZATION
+Reassess the transition between ovarian:
+- non-neoplastic material;
+- tumor-like material, if present;
+- tumors/neoplastic material.
+
+The reviewer noted that terminology and division were not always conceptually parallel.
+
+Make sure top-level labels are deliberate and internally coherent.
+
+OVARY: METASTASIS STRUCTURE
+Review labels such as:
+Metastases -> Metastases to ovary
+
+If the entire branch is already under ovary, repeated site wording may be unnecessary.
+
+Also evaluate how much detail is useful when listing common primary sites of ovarian metastases.
+
+Do not inherit an arbitrarily deep source-derived hierarchy merely because one source provided it.
+
+GYNECOLOGIC MESENCHYMAL TUMORS
+Exercise particular caution with uterine and ovarian:
+- smooth-muscle tumors;
+- stromal tumors;
+- other mesenchymal entities.
+
+Some gynecologic mesenchymal diagnoses have organ-specific criteria and behavior.
+
+Do not reorganize them simply because similarly named soft-tissue tumors exist elsewhere.
+
+PERITONEUM
+The reviewer considered this section generally sound.
+
+Focus on:
+- verifying placement;
+- checking consistency;
+- preserving sound structure.
+
+Do not restructure it without a specific reason.
+
+FALLOPIAN TUBE
+The reviewer likewise found this section broadly reasonable.
+
+Do not introduce changes merely for symmetry with ovary or uterus if the existing organization is clinically appropriate.
+
+VAGINA AND VULVA
+The individual diagnoses were generally considered appropriate.
+
+Concentrate on whether higher-level grouping accurately distinguishes:
+- epithelial;
+- glandular;
+- squamous;
+- germ-cell;
+- mesenchymal;
+- melanocytic;
+- non-neoplastic disease.
+
+Do not aggressively reorganize these sections without a clear reason.
+
+PLACENTA
+Do NOT treat the lack of reviewer criticism as validation.
+
+The reviewer explicitly skipped much of placental review because it was outside his area of confidence.
+
+Placental and trophoblastic organization therefore requires independent careful checking.
+
+BROAD LIGAMENT / OTHER UTERINE LIGAMENTS AND TROPHOBLASTIC SECTIONS
+These received only brief review.
+
+Treat them as insufficiently validated.
+
+Inspect them independently rather than assuming the current organization is correct.
+
+
+================================================================================
+31. BREAST: SPECIFIC CONCERNS FROM EXPERT REVIEW
+================================================================================
+
+During the breast second pass, give particular attention to the following reviewer-identified areas.
+
+These are starting points for manual review, not an exhaustive list, and should not override the broader requirement to inspect every diagnosis and hierarchy.
+
+For every issue below:
+1. inspect the current MergeFinalDraft2 structure;
+2. inspect the original YAML/source structures;
+3. manually determine what the diagnoses and categories actually represent;
+4. preserve the current structure when it is medically defensible;
+5. modify it only when there is a clear reason;
+6. flag genuinely uncertain decisions rather than forcing a change.
+
+The expert review was broadly positive about the breast ontology, especially the individual diagnostic leaves. Treat breast primarily as a targeted cleanup and hierarchy-consistency pass rather than a reason to broadly rebuild sections that are already clinically coherent.
+
+SOURCE-HEADING ARTIFACTS IN BREAST
+The reviewer repeatedly encountered breast headings containing "Introduction," including DCIS-related and papillary-neoplasm branches.
+
+Apply the general source-artifact rules carefully here:
+- remove "Introduction" when it is only textbook/navigation language;
+- preserve and rename the underlying legitimate diagnostic/category concept when appropriate;
+- check nearby breast headings for the same source-derived artifact.
+
+ATYPICAL LOBULAR HYPERPLASIA PLACEMENT
+Review the placement of atypical lobular hyperplasia.
+
+The reviewer questioned whether it would be more coherent under benign epithelial proliferations and precursors, particularly because atypical ductal hyperplasia is organized there, rather than under lobular neoplasia.
+
+This was raised as a possible organizational improvement, not a definite error.
+
+Inspect accepted classification and the surrounding breast hierarchy before deciding whether to move it.
+
+FIBROEPITHELIAL TUMORS / HEMATOMA GROUPING
+Review the branch labeled approximately:
+Fibroepithelial tumors and hematomas of the breast
+
+The reviewer found this grouping conceptually unusual because fibroepithelial tumors such as phyllodes tumor are not hematomas.
+
+Determine whether:
+- the combined heading reflects a meaningful source category;
+- two distinct concepts were accidentally grouped together during merging;
+- or the branch should be separated or renamed.
+
+Do not preserve the combined label merely because it exists in a source if the parent category is not semantically true and useful for all children.
+
+KNOWN BREAST AREAS WITH REPEATED DIAGNOSES
+The reviewer specifically noticed repeated breast diagnoses in multiple branches, including:
+- tubular adenoma;
+- usual ductal hyperplasia;
+- sclerosing adenosis;
+- atypical ductal hyperplasia.
+
+Use these as targeted checkpoints during the within-site duplicate review.
+
+For each occurrence, determine whether it reflects:
+- a true duplicate created by source merging;
+- a diagnosis appearing beneath two overlapping organizational schemes;
+- or a clinically meaningful placement that needs hierarchy clarification.
+
+Do not assume that every repeated name should remain in multiple independent locations.
+
+BENIGN EPITHELIAL / FIBROCYSTIC / SCLEROSING LESION OVERLAP
+Pay particular attention to overlap between:
+- benign epithelial proliferations and precursors;
+- adenosis and benign sclerosing lesions;
+- fibrocystic changes;
+- related intraductal atypia branches.
+
+The reviewer noted that some diagnoses recur across these areas.
+
+Review whether the higher-level categories are dividing the same conceptual space in competing source-derived ways, and choose the most clinically informative local organization.
+
+HEMATOLYMPHOID BREAST SECTION
+The reviewer considered the listed breast lymphomas reasonable, including breast implant-associated anaplastic large cell lymphoma and common lymphoma types involving breast.
+
+The main concern was not the individual diagnoses, but whether the breast hierarchy implies that general hematolymphoid entities are uniquely breast-specific.
+
+During this pass:
+- verify that the local breast grouping is clinically sensible;
+- preserve site-specific entities where appropriate;
+- do not force structural changes solely because similar diagnoses also occur in other organs.
+
+Cross-organ identity reconciliation remains outside the current pass.
+
+MESENCHYMAL BREAST SECTION
+The reviewer likewise considered the individual mesenchymal diagnoses generally reasonable.
+
+However, many are general soft-tissue entities that can occur in breast rather than uniquely breast-defined diseases.
+
+Review whether the breast-specific parent structure is clinically useful and whether any source-derived branch labels imply a stronger breast-specific identity than is justified.
+
+Do not automatically merge or cross-link across organ systems during this pass.
+
+NIPPLE / BENIGN CHANGE SECTIONS
+Review the nipple, radial scar, fibrocystic change, adenosis, and related benign-change branches together for local consistency.
+
+The reviewer encountered repeated entities while moving through these areas, suggesting that some source-specific grouping schemes may overlap.
+
+Preserve clinically meaningful distinctions, but avoid parallel branches that represent the same local concept space without adding useful classification information.
+
+NEUROENDOCRINE GRANULARITY
+During later review of the female genital tract, the reviewer noted that cervical neuroendocrine carcinoma was subdivided into large-cell and small-cell forms while breast neuroendocrine carcinoma had not been broken out the same way.
+
+Do NOT automatically add large-cell and small-cell subdivisions to breast.
+
+Instead, check whether the current breast level of granularity is:
+- clinically appropriate;
+- consistent with current accepted breast classification;
+- or merely less detailed because of the source used.
+
+BREAST REVIEW PRIORITY
+The reviewer repeatedly described the breast diagnostic leaves as strong and the overall section as good.
+
+Therefore:
+- prioritize clearly justified hierarchy cleanup;
+- prioritize source-artifact removal;
+- prioritize review of the named overlapping/repeated branches above;
+- do not aggressively restructure already-sound epithelial, papillary, rare/salivary-gland-type, nipple, inflammatory/infectious, or other branches without a specific semantic problem.
+
+The purpose of the breast pass is to make an already-strong diagnostic set more coherent, not to redesign it for cosmetic uniformity.
+
+
+================================================================================
+32. HISTORICAL VS CURRENT CLASSIFICATION, EXTERNAL VERIFICATION, AND DIAGNOSTIC GRANULARITY
+================================================================================
+
+Some organ/site branches cannot be reviewed correctly by comparing only the existing merged ontology, WHO source hierarchy, and Pathology Outlines hierarchy.
+
+Classification systems change over time, and different sources may organize the same diagnostic space using different axes. The ontology may therefore contain:
+- older broad diagnostic categories;
+- newer more specific diagnoses;
+- historical classification systems still useful for legacy data;
+- histogenesis/lineage categories such as epithelial, neuroendocrine, mesenchymal, etc.;
+- behavior categories such as benign, borderline/intermediate, in situ, malignant, etc.;
+- grade, differentiation, severity, chronicity, pattern, or morphology labels;
+- broad family labels where current pathology practice would ordinarily report a more specific diagnosis.
+
+For these branches, do NOT simply ask whether the existing source structures were merged correctly.
+
+Also ask whether the source classifications themselves are current, clinically meaningful, sufficiently granular, and compatible with one another.
+
+When necessary, use reliable current pathology references, current classification material, and other authoritative sources to verify:
+- what the diagnosis is currently called;
+- whether an older term remains current, is historical, is broader, or is a true synonym;
+- which subdivisions are currently recognized;
+- whether a pathologist would actually sign out the broad label or normally use a more specific diagnosis;
+- whether grade/differentiation/severity/chronicity is part of the diagnostic entity or an orthogonal attribute;
+- whether two source hierarchies are organizing the same concept space on incompatible axes.
+
+Do not accept WHO or Pathology Outlines organization merely because it is present in the project. Use them as evidence and provenance, then verify the medically appropriate current representation when the hierarchy is unclear or conflicting.
+
+RECONCILING INCOMPATIBLE ORGANIZATIONAL AXES
+WHO and Pathology Outlines may organize the same site differently.
+
+For example, one source may primarily divide tumors into:
+- epithelial;
+- neuroendocrine;
+- mesenchymal;
+- hematolymphoid;
+- germ cell;
+- other lineage/histogenesis groups;
+
+while another may primarily divide them into:
+- benign;
+- borderline/intermediate;
+- in situ;
+- malignant;
+- other behavior categories.
+
+These are overlapping axes, not automatically separate conceptual spaces.
+
+A tumor can be both epithelial and benign.
+A tumor can be both neuroendocrine and malignant.
+Therefore, do NOT preserve both source schemes as parallel ontology branches merely because each is technically true.
+
+For each affected branch, determine:
+1. what concepts each source is trying to distinguish;
+2. whether both distinctions are clinically useful;
+3. which axis should be primary in the hierarchy;
+4. whether the second axis belongs beneath it, belongs in metadata, or is unnecessary as a hierarchy level;
+5. whether preserving both would cause the same diagnoses or conceptual families to appear repeatedly under different headings;
+6. whether a proposed parent category is true for every child and adds meaningful information.
+
+Avoid needless categories that exist only because a diagnosis could technically fit under them.
+
+Avoid structures where the same conceptual space is independently represented once by behavior and again by lineage, producing duplicate or near-duplicate branches containing different subsets of the same family.
+
+There is no universal rule that lineage must always be primary or that behavior must always be primary.
+
+Make this decision branch by branch based on:
+- current accepted classification;
+- clinical usefulness;
+- diagnostic reporting practice;
+- whether the hierarchy remains semantically true;
+- whether the organization avoids unnecessary duplication;
+- whether historical data can still be represented.
+
+Record the reason for the chosen organization when reconciling substantially different source schemes.
+
+CURRENT DIAGNOSTIC GRANULARITY
+Do not assume an existing broad ontology node is sufficiently granular merely because it is technically correct.
+
+For every broad diagnostic family, ask:
+
+    Would a practicing pathologist ordinarily stop at this label,
+    or would the final diagnosis normally contain a more specific
+    recognized subtype, differentiation, grade, pattern, or other
+    diagnostic distinction?
+
+If current practice routinely uses recognized diagnoses below the existing broad node, investigate whether actual diagnoses are missing from the ontology.
+
+This is especially important when:
+- the ontology jumps directly from a broad category to a generic leaf;
+- sibling branches are represented at much finer diagnostic resolution;
+- a physician would ordinarily include a more specific recognized term in the diagnosis;
+- distinctions affect accepted nomenclature, prognosis, management, classification, or interpretation;
+- the broad source category appears to be a grouping concept rather than the terminal diagnosis.
+
+Use authoritative current references to identify the appropriate recognized diagnoses.
+
+Do not invent subdivisions merely to increase granularity.
+
+Add or propose missing concepts only when they represent real diagnostic terminology that would plausibly appear in pathology reporting.
+
+DISTINGUISH DIAGNOSIS FROM GRADE / SEVERITY / DIFFERENTIATION / CHRONICITY
+Terms such as:
+- well differentiated;
+- moderately differentiated;
+- poorly differentiated;
+- low grade;
+- high grade;
+- mild;
+- moderate;
+- severe;
+- acute;
+- chronic;
+
+may be clinically important without always representing independent disease entities.
+
+For each disease, determine whether such a term is:
+- part of the recognized diagnostic entity;
+- a formal subtype;
+- a formal grade;
+- a differentiation category;
+- a severity descriptor;
+- a chronicity/state descriptor;
+- or another attribute.
+
+Represent the distinction accordingly.
+
+Do not create separate diagnosis leaves for every severity or grade value when these are better represented as attributes.
+
+Conversely, do not collapse genuinely distinct recognized diagnoses into one broad family merely because they share lineage.
+
+HISTORICAL TERMINOLOGY AND LEGACY DATA
+The ontology must remain useful for historical datasets even when diagnostic classification has changed.
+
+When older and newer schemes coexist, determine whether each older term is:
+- still a current preferred diagnosis;
+- a true synonym for a current diagnosis;
+- a broader historical category;
+- an older classification axis spanning several current diagnoses;
+- a legacy coding/reporting category;
+- or a concept that remains independently meaningful.
+
+Do not place historical and current terms beside one another as equivalent leaves when they represent different levels or different classification systems.
+
+Preserve historical usefulness through the most appropriate mechanism, such as:
+- synonym/alias;
+- historical term field;
+- BROADER/NARROWER relationship;
+- legacy classification metadata;
+- meaningful parent category;
+- provenance to the original source system.
+
+The goal is to allow historical records to map into the ontology without forcing the current diagnostic hierarchy to reproduce an obsolete classification system.
+
+ESOPHAGITIS / INFLAMMATORY DISEASE EXAMPLE
+For inflammatory branches such as esophagitis, do not automatically inherit an overly specific source-derived organizational axis.
+
+Review whether clinically meaningful distinctions are instead based on:
+- acute versus chronic;
+- recognized etiologic/type categories;
+- severity such as mild/moderate/severe;
+- other accepted histopathologic distinctions.
+
+Determine which of these are diagnoses and which are attributes.
+
+Do not organize the branch primarily around a less useful location/subsite distinction if current diagnostic practice is more meaningfully described by chronicity, etiology, or another accepted axis.
+
+GASTRIC ADENOCARCINOMA: HISTORICAL VS CURRENT CLASSIFICATION
+Review gastric adenocarcinoma particularly carefully because historical and current classifications may divide the same tumors using different schemes.
+
+Terms such as:
+- diffuse;
+- intestinal;
+- tubular;
+- differentiation-based terminology;
+- other morphologic subtype labels;
+
+must not automatically be treated as equivalent sibling diagnoses.
+
+Verify the current accepted classification and determine for each term whether it is:
+- a current diagnosis;
+- a current morphologic subtype;
+- a broader historical category;
+- a legacy classification label;
+- an attribute;
+- or a true synonym.
+
+Where newer classifications use more specific morphologic diagnoses while older datasets use broader diffuse/intestinal-type categories, preserve both kinds of information without pretending they represent the same level of granularity.
+
+If an older broad category spans several current diagnoses, consider representing it through historical classification metadata or an appropriate broader relationship rather than duplicating the modern hierarchy beneath a parallel legacy branch.
+
+NEUROENDOCRINE / MIXED NEUROENDOCRINE GRANULARITY
+Pay particular attention to broad neuroendocrine and mixed neuroendocrine/endocrine branches.
+
+A generic node such as:
+- Neuroendocrine tumor;
+- Neuroendocrine carcinoma;
+- Mixed neuroendocrine neoplasm;
+- another broad endocrine/neuroendocrine family;
+
+may be insufficient if current diagnostic practice routinely distinguishes recognized diagnoses beneath it.
+
+For each such branch:
+1. inspect what the current ontology contains;
+2. inspect the WHO and Pathology Outlines source material;
+3. verify the current accepted classification using authoritative references when needed;
+4. determine what specific labels would ordinarily appear in a pathology diagnosis;
+5. distinguish recognized diagnostic entities from grade/differentiation attributes;
+6. identify missing diagnostic concepts when the ontology stops at an overly broad family label.
+
+If a physician would ordinarily report a more specific recognized diagnosis than the ontology currently permits, treat that as a potential missing-diagnosis problem rather than merely a cosmetic hierarchy issue.
+
+Do not assume that having the broad neuroendocrine family represented means the ontology is complete.
+
+WORKFLOW FOR CONFLICTING OR EVOLVING CLASSIFICATIONS
+When a branch contains historical/current conflict or incompatible source organization:
+
+1. Inventory the concepts currently present before reorganizing.
+2. Identify which terms are current, historical, broad, specific, subtype-level, behavior-level, grade-level, severity-level, differentiation-level, or attribute-level.
+3. Compare WHO and Pathology Outlines organization.
+4. When those sources conflict, are old, or are insufficiently granular, verify current classification using reliable outside references.
+5. Determine how diagnoses are actually reported in current pathology practice.
+6. Choose the most clinically coherent primary hierarchy.
+7. Incorporate a second useful axis only where it adds real classification information without duplicating the same concept space.
+8. Map historical terminology onto the modern representation through aliases, broader/narrower relations, historical metadata, legacy groupings, or provenance as appropriate.
+9. Confirm that historical records can still be represented.
+10. Confirm that current records can be represented at the specificity normally used in practice.
+11. Flag unresolved historical-to-modern mappings rather than forcing false one-to-one equivalence.
+12. Record the rationale when rejecting or modifying a source hierarchy because another organization is more clinically defensible.
+
+The goal is not to maximize the number of categories or to preserve every source hierarchy simultaneously.
+
+The goal is a current, clinically useful ontology that can still interpret historical terminology, avoids redundant parallel organizations, and contains enough diagnostic granularity to represent what pathologists actually diagnose.
+
+
+================================================================================
+33. HEAD AND NECK: SPECIFIC CONCERNS FROM EXPERT REVIEW
+================================================================================
+
+During the head and neck second pass, give particular attention to craniofacial bone, soft-tissue, notochordal, osteogenic, molecularly defined sarcoma, and residual "other tumor" branches that may overlap with the Bone and Soft Tissue classification.
+
+These reviewer comments are starting points for manual review, not automatic edits.
+
+For every issue below:
+1. inspect the current MergeFinalDraft2 Head and Neck structure;
+2. inspect the corresponding Bone and Soft Tissue material where relevant;
+3. inspect the original WHO and Pathology Outlines source structures;
+4. verify current terminology and classification using current authoritative pathology references when the source hierarchy may be outdated, incomplete, or internally inconsistent;
+5. determine whether the entity truly belongs in Head and Neck, belongs primarily in another organ system, or legitimately has a site-specific representation;
+6. preserve clinically meaningful distinctions while avoiding source-derived duplication or inappropriate category structure;
+7. flag uncertain decisions rather than forcing a change.
+
+Do not assume that a concept belongs in Head and Neck merely because it can anatomically occur there.
+
+Distinguish:
+- diagnoses specifically meaningful to head-and-neck / craniofacial pathology;
+- general bone or soft-tissue entities that may occur in the region;
+- site-specific variants or classifications;
+- non-neoplastic or tumor-like lesions that may have been placed beneath tumor headings by source-merging artifacts.
+
+NOTOCHORDAL TUMORS / CHORDOMA
+Review the notochordal tumor hierarchy carefully.
+
+The reviewed structure included entities such as:
+- benign notochordal cell tumor;
+- conventional chordoma;
+- dedifferentiated chordoma;
+- poorly differentiated chordoma;
+
+directly beneath a broad Notochordal tumours category.
+
+Consider whether Chordoma itself should function as a meaningful diagnostic family/category with recognized chordoma subtypes beneath it, rather than representing all chordoma subtypes as unrelated siblings directly under Notochordal tumours.
+
+Conceptually inspect a structure such as:
+
+    Notochordal tumours
+      - Benign notochordal cell tumour, if confirmed as a valid distinct entity relevant to the site
+      - Chordoma
+          - recognized chordoma subtypes
+
+Do NOT assume this exact structure is correct without verification.
+
+Specifically:
+- verify current recognized chordoma subtypes;
+- verify whether Chordoma should itself remain an assignable diagnosis in addition to functioning as a parent category;
+- verify the current status and terminology of benign notochordal lesions;
+- determine whether particular chordoma entities warrant representation within Head and Neck because of skull-base/head-and-neck relevance;
+- do not create a Head and Neck duplicate merely because chordoma can occur at the skull base if the project's current site-scope rules indicate it should remain elsewhere.
+
+The reviewer was uncertain about the benign notochordal entity.
+
+Do NOT treat that uncertainty as evidence that the diagnosis is wrong or should be deleted. Verify it independently against current authoritative classification.
+
+OSTEOGENIC TUMORS: INCONSISTENT BEHAVIOR ORGANIZATION
+Review the entire osteogenic tumor branch rather than correcting only individual leaves.
+
+The reviewed hierarchy contained a Malignant category, but:
+- only some malignant osteogenic tumors appeared beneath it;
+- other malignant osteosarcoma entities appeared outside that branch;
+- benign osteogenic tumors also appeared at the same level;
+- there was no corresponding coherent Benign organization.
+
+This suggests that behavior classification may have been applied to only part of the branch, potentially because incompatible source hierarchies were merged.
+
+Do not leave a partial structure such as:
+
+    Osteogenic tumours
+      - Malignant
+          - some malignant diagnoses
+      - other malignant diagnoses
+      - benign diagnoses
+
+without a clinically defensible reason.
+
+Manually classify every osteogenic entity and decide whether the branch is better organized by:
+- tumor family / morphology;
+- behavior;
+- another accepted current classification;
+- or a combination in which one axis is primary and the other is represented beneath it or as metadata.
+
+Do not automatically create Benign and Malignant categories merely for symmetry.
+
+Instead:
+- verify current classification;
+- verify whether each entity is actually benign, intermediate, malignant, or otherwise classified;
+- choose the organization that best represents actual diagnostic relationships;
+- make sure every parent label is semantically true for all children.
+
+Pay particular attention to entities currently outside the Malignant branch that are themselves malignant, because their placement may expose an incomplete or contradictory merged hierarchy.
+
+CURRENT WHO / UPDATED CLASSIFICATION CHECK FOR BONE AND SOFT-TISSUE ENTITIES
+The reviewer explicitly cautioned that some bone and soft-tissue classifications have changed in newer WHO material.
+
+For molecularly defined sarcomas, bone tumors, chordoma-related entities, and similar branches:
+- verify which WHO/classification version the current ontology reflects;
+- check whether terminology has changed;
+- check whether entities have been split, merged, renamed, or reclassified;
+- preserve historical terminology when useful for legacy data;
+- do not represent an obsolete and current term as separate diagnoses unless they genuinely represent distinct entities;
+- document why a hierarchy was changed when newer classification materially changes the source-derived organization.
+
+MOLECULARLY DEFINED SMALL ROUND CELL SARCOMAS
+Review molecularly defined small round cell sarcoma terminology against current classification, particularly where the ontology contains gene/fusion-defined entities such as:
+- BCOR-related tumors;
+- BCOR::CCNB3 sarcoma;
+- CIC-rearranged sarcoma;
+- EWSR1-non-ETS fusion-associated round cell sarcoma;
+- Ewing sarcoma;
+- other molecularly defined round-cell sarcomas.
+
+The reviewer specifically raised concern about:
+- current gene/fusion naming;
+- whether the molecular result should appear directly in the preferred/top-line diagnostic name;
+- whether a broad gene-defined family category is necessary when it contains only one represented diagnosis;
+- whether older and newer molecular terminology have been mixed.
+
+For each molecular branch, determine:
+- the current preferred diagnostic name;
+- the correct current gene/fusion notation;
+- whether the genetic alteration defines the diagnosis or should instead be represented as supporting metadata;
+- whether a gene-alteration family contains multiple recognized entities and therefore adds real classification meaning;
+- whether a category is only a redundant one-child intermediate node;
+- whether the actual signed-out diagnosis would ordinarily contain the molecular designation.
+
+Do not retain both a molecular family heading and an effectively identical single diagnosis beneath it unless the parent adds meaningful classification information.
+
+Do not simplify gene-defined diagnoses based only on string similarity.
+
+The molecular definition may be the feature that distinguishes the entity.
+
+RESIDUAL `OTHER` CATEGORIES
+Review catch-all categories such as:
+- Other tumours;
+- Other mesenchymal tumours;
+- Other mesenchymal tumours of bone;
+- Other neoplasms of bone;
+- similar residual categories.
+
+Do not maintain several overlapping "other" branches merely because different sources created them.
+
+Determine what each branch is intended to contain and whether multiple residual branches are dividing the same conceptual space without a useful distinction.
+
+Where two residual categories are functionally redundant, consider consolidating or reorganizing them into one clinically coherent residual structure.
+
+However, do NOT blindly move all of their contents together.
+
+Manually review every child before deciding how the residual category itself should be handled.
+
+`OTHER TUMOURS`: MANY CONTENTS MAY NOT ACTUALLY BE TUMORS
+The reviewer specifically cautioned that an Other tumours branch appeared to contain several concepts that may not actually be neoplasms.
+
+Examples visible in the reviewed branch included:
+- myositis ossificans;
+- infantile myofibromatosis;
+- liposclerosing myxofibrous tumor;
+- xanthoma;
+- systemic mastocytosis;
+- juxta-articular myxoma.
+
+Do NOT assume these all belong together or even belong beneath a tumor category.
+
+For every entity in this and similar residual branches:
+1. determine whether it is actually neoplastic;
+2. determine whether it is a bone lesion, bone-marrow/hematologic process, soft-tissue lesion, reactive process, developmental process, inflammatory lesion, tumor-like process, or another type of entity;
+3. determine whether it belongs in the current Head and Neck site at all;
+4. move it to a more accurate local category when appropriate;
+5. remove it from the site when it is only a generic diagnosis from another domain with no defensible site-specific role;
+6. check whether it already exists elsewhere within the same site before creating or moving a second copy.
+
+This requires diagnosis-by-diagnosis semantic review, not merely renaming the Other tumours category.
+
+JUxta-ARTICULAR MYXOMA / SOFT-TISSUE ENTITIES IN BONE BRANCHES
+The reviewer specifically flagged juxta-articular myxoma as an example of a lesion that should not automatically remain in a bone-tumor hierarchy merely because it appeared there after source merging.
+
+Verify whether it is fundamentally a soft-tissue entity rather than a bone neoplasm.
+
+If it is not appropriately a bone diagnosis:
+- remove it from the bone-specific branch;
+- place it only where clinically justified;
+- do not preserve it under Other tumours merely because no better source-derived category exists.
+
+Apply the same reasoning to other apparent soft-tissue entities discovered inside bone-specific branches.
+
+Do not duplicate a generic soft-tissue diagnosis in a bone ontology solely because it may occur adjacent to bone.
+
+`OTHER MESENCHYMAL TUMOURS OF BONE`: CONTENT REVIEW
+Do not assume the existing Other mesenchymal tumours of bone category is internally valid merely because its label sounds reasonable.
+
+Review every child.
+
+The reviewed branch appeared to contain a mixture of concepts that may include:
+- primary bone tumors;
+- metastatic disease;
+- tumor-like or non-neoplastic bone lesions;
+- true mesenchymal neoplasms;
+- entities whose classification may have changed;
+- lesions that belong more naturally elsewhere.
+
+A parent called Other mesenchymal tumours of bone is only valid if every child is actually a mesenchymal neoplasm of bone.
+
+If an entity is:
+- metastatic rather than a primary mesenchymal tumor;
+- non-neoplastic;
+- tumor-like;
+- hematologic;
+- developmental;
+- reactive;
+- inflammatory;
+- or principally a soft-tissue diagnosis;
+
+move or remove it accordingly.
+
+Consider whether some legitimate residual bone neoplasms are better represented under a broader Other neoplasms of bone category rather than forcing everything into Other mesenchymal tumours.
+
+MOVE TRUE RESIDUAL BONE NEOPLASMS TO A MORE ACCURATE RESIDUAL CATEGORY
+Where a concept is genuinely a bone neoplasm but does not fit the named osteogenic, chondrogenic, notochordal, giant-cell, vascular, or other specific family branches, consider whether it belongs under a broader Other neoplasms of bone category.
+
+Do not use Other neoplasms of bone as a dumping ground.
+
+Only use it when:
+- the entity is truly neoplastic;
+- it is truly a bone diagnosis;
+- no more specific recognized family is appropriate;
+- the residual category is more accurate than the existing source-derived parent.
+
+SOFT-TISSUE TUMORS SHOULD NOT BE FORCED INTO BONE
+When a lesion is fundamentally a soft-tissue tumor rather than a bone tumor, do not retain it in a bone-specific branch merely because it appeared in a source chapter adjacent to bone pathology.
+
+If the entity does not have a distinct bone-specific diagnostic identity:
+- remove it from the bone branch;
+- retain or place it only in the appropriate soft-tissue or site-specific context;
+- note cross-organ/cross-system relevance for the later harmonization phase if needed.
+
+CHECK FOR DUPLICATION BEFORE REORGANIZING RESIDUAL CATEGORIES
+Before moving anything between:
+- Other tumours;
+- Other mesenchymal tumours;
+- Other mesenchymal tumours of bone;
+- Other neoplasms of bone;
+- neighboring specific tumor families;
+
+search the current site for another representation of the diagnosis.
+
+Determine whether the apparent second instance is:
+- a true same-site duplicate;
+- a subtype;
+- a historical label;
+- a broad category;
+- a separate diagnosis;
+- or the same concept placed under competing source-derived organizational schemes.
+
+Do not solve a bad category by creating a second copy of its contents elsewhere.
+
+HEAD AND NECK / BONE AND SOFT-TISSUE BOUNDARY
+This review should pay particular attention to entities that occur in the head and neck but fundamentally belong to broader bone or soft-tissue classifications.
+
+For each such entity, ask:
+
+    Is this a head-and-neck-specific diagnostic entity,
+    or is it a general bone/soft-tissue diagnosis that merely
+    happens to occur in this anatomic region?
+
+Do not populate Head and Neck with every general mesenchymal or bone tumor that can occur there.
+
+Conversely, preserve head-and-neck representation when:
+- the site materially changes classification;
+- the entity has specific craniofacial or skull-base relevance;
+- accepted pathology classification treats it meaningfully within this site;
+- diagnostic criteria or behavior differ by site;
+- or the project's organ-based design intentionally represents a site-relevant entity there.
+
+Because cross-organ canonicalization is not part of the current pass, do not solve this by creating cross-system canonical entities yet.
+
+Record cross-organ issues for the later harmonization phase.
+
+HEAD AND NECK REVIEW PRIORITY
+For this area, prioritize:
+
+1. verifying current classification rather than trusting inherited source organization;
+2. identifying partial or contradictory behavior categories;
+3. correcting bone-versus-soft-tissue-versus-non-neoplastic placement;
+4. ensuring molecularly defined diagnoses use current recognized terminology and adequate diagnostic granularity;
+5. eliminating redundant residual Other categories where they represent the same conceptual space;
+6. preserving meaningful diagnostic families such as chordoma with appropriate subtype structure where supported;
+7. checking every residual-category child rather than assuming the category label is accurate;
+8. avoiding same-site duplication when reorganizing;
+9. preserving historical terminology and provenance when modern classification has changed;
+10. flagging uncertain site-membership or modern-classification questions for expert review.
+
+Do not attempt to make the tree aesthetically symmetrical.
+
+The goal is for every parent-child relationship to be medically defensible, for outdated and current classification systems to be reconciled deliberately, and for the ontology to represent the level of specificity actually used in current pathology diagnosis.
+
+================================================================================
+34. CURRENT PASS BOUNDARIES
+================================================================================
+
+For the current pass:
+
+DO:
+- start from MergeFinalDraft2;
+- review one organ/site at a time;
+- use YAML/JSON sources as references;
+- manually reason through hierarchy;
+- merge only true duplicates/synonyms within the same site;
+- attach metadata from local Metadata/ resources;
+- inspect README/sheet/column structure before using unfamiliar metadata tables;
+- distinguish EXACT from BROADER/NARROWER/APPROXIMATE mappings;
+- allow multiple diagnoses to share one external code when correct;
+- keep SNOMED empty until authorized structured data is available;
+- preserve provenance;
+- save each refinement as a new recoverable draft;
+- reopen and re-check newly generated drafts;
+- log changes;
+- flag uncertain decisions;
+- note new WHO diagnoses for later incorporation.
+
+DO NOT:
+- rebuild the ontology from scratch;
+- blindly preserve source hierarchy;
+- blindly run string filters and accept results;
+- merge diagnoses across different organs;
+- perform organ-system-wide canonicalization;
+- create cross-organ canonical entities;
+- force symmetry between sites;
+- invent metadata;
+- force every diagnosis to have an ICD/ICD-O/NCIt mapping;
+- merge diagnoses because they share an external code;
+- populate SNOMED from unsupported/unlicensed sources;
+- use unsupported external mappings;
+- silently discard conflicting source information;
+- overwrite earlier drafts;
+- aggressively incorporate all newly released WHO diagnoses during this pass.
+
+================================================================================
+35. FINAL PRINCIPLE
+================================================================================
+
+The best result is not the smallest tree, the most symmetrical tree, or the tree that looks most like any single source.
+
+The best result is the ontology that:
+- makes diagnostic sense;
+- preserves meaningful site-specific distinctions;
+- removes obvious within-site duplication;
+- represents hierarchy clearly;
+- preserves useful source information;
+- attaches reliable metadata;
+- remains auditable through provenance and change logs;
+- and leaves genuinely uncertain questions visible for later expert review.
