@@ -46,4 +46,4 @@ This resource is an evolving research ontology. It has not been fully expert-rev
 
 Samantha Fish  
 University of North Carolina at Chapel Hill  
-[INSERT UNC EMAIL]
+sjfish@unc.edu
